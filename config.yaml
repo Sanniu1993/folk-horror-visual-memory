@@ -1,0 +1,23 @@
+# 中国民俗恐怖视觉记忆系统 —— 配置
+# 供应商说明:VLM + Embedding 走 AIHubMix(OpenAI 兼容聚合网关),
+# 故事拆解走 DeepSeek。key 从 .env 读取。
+
+aihubmix:
+  base_url: "https://aihubmix.com/v1"
+  vlm_model: "qwen3-vl-plus"        # 视觉理解;批量省钱可换 qwen3-vl-flash
+  embed_model: "text-embedding-v4"  # 向量(Qwen 系,中文强);默认 1024 维
+  embed_dim: 1024                   # 仅无 key 哈希兜底用;真 embedding 按接口返回维度存
+
+deepseek:
+  base_url: "https://api.deepseek.com"
+  model: "deepseek-chat"
+  temperature: 0.4
+
+database:
+  path: "data/memory.db"            # sqlite-vec 本地向量库
+
+retrieval:
+  top_k: 6                          # 每次检索返回的视觉经验条数
+
+paths:
+  uploads: "data/uploads"           # 收录的原始图片落盘位置

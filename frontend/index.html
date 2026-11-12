@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>中国民俗恐怖 · 视觉记忆系统</title>
+<style>
+  :root{
+    --ink:#0a0b0d; --panel:#131519; --panel-2:#1a1d23; --border:#282c34;
+    --text:#dbdfe6; --muted:#8b93a2; --blood:#c01722; --blood-glow:#e23b44;
+    --cold:#7fb0d8; --display:"Songti SC","STSong",serif;
+    --body:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
+    --mono:"SF Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;} body{margin:0;background:var(--ink);color:var(--text);
+    font-family:var(--body);line-height:1.6;}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 20px 80px;}
+  h1{font-family:var(--display);font-size:26px;margin:0 0 2px;}
+  h1 .red{color:var(--blood-glow);}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:16px;}
+  .stats{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:8px;
+    padding:8px 14px;font-size:13px;}
+  .stat b{font-family:var(--mono);color:var(--cold);font-size:16px;margin-right:6px;}
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:20px;}
+  .tab{padding:9px 16px;cursor:pointer;color:var(--muted);font-size:14px;
+    border-bottom:2px solid transparent;user-select:none;}
+  .tab.active{color:var(--text);border-bottom-color:var(--blood);}
+  .panel{display:none;} .panel.active{display:block;}
+  label{font-size:13px;color:var(--muted);display:block;margin:12px 0 5px;}
+  input[type=text],textarea{width:100%;background:var(--panel-2);color:var(--text);
+    border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;
+    font-family:inherit;}
+  textarea{min-height:120px;resize:vertical;line-height:1.6;}
+  input:focus,textarea:focus{outline:none;border-color:var(--cold);}
+  button{background:var(--blood);color:#fff;border:none;border-radius:8px;
+    padding:10px 20px;font-size:14px;cursor:pointer;margin-top:12px;}
+  button.ghost{background:var(--panel-2);border:1px solid var(--border);}
+  button:disabled{opacity:.5;cursor:not-allowed;}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+  .chk{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer;}
+  .hint{color:var(--muted);font-size:12px;margin-top:8px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;
+    padding:16px;margin-top:14px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px;}
+  .mat{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;}
+  .mat img{width:100%;height:110px;object-fit:cover;display:block;}
+  .mat .meta{padding:6px 8px;font-size:11px;color:var(--muted);}
+  .badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:6px;border:1px solid var(--border);}
+  .badge.reviewed{color:#3fae6a;border-color:#2c5c3f;} .badge.analyzed{color:var(--cold);border-color:var(--cold);}
+  .badge.pending{color:var(--muted);}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .promptbox{background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:12px;
+    font-size:13px;line-height:1.6;min-height:80px;white-space:pre-wrap;}
+  .promptbox.enh{border-color:var(--blood);}
+  .lab{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+  .lab.blue{color:var(--cold);} .lab.red{color:var(--blood-glow);}
+  .tag{display:inline-block;font-size:11px;background:var(--panel-2);border:1px solid var(--border);
+    border-radius:5px;padding:2px 7px;margin:2px 3px 0 0;color:var(--cold);}
+  .refimg{position:relative;} .refimg .score{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.7);
+    color:#fff;font-size:10px;padding:1px 6px;border-radius:6px;font-family:var(--mono);}
+  .err{color:#f0b8b8;font-size:13px;margin-top:8px;}
+  .progress{margin-top:12px;}
+  .pbar{height:8px;background:var(--panel-2);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+  .pbar-fill{height:100%;width:0;background:var(--blood);transition:width .25s ease;}
+  .mat.doing{outline:2px solid var(--cold);outline-offset:-2px;}
+  .dropzone{border:1.5px dashed var(--border);border-radius:10px;padding:22px 16px;text-align:center;
+    color:var(--muted);font-size:13px;cursor:pointer;transition:border-color .15s,background .15s;}
+  .dropzone:hover{border-color:var(--cold);}
+  .dropzone.drag{border-color:var(--blood);background:rgba(192,23,34,.08);color:var(--text);}
+  .dropzone .big{font-size:22px;display:block;margin-bottom:6px;}
+  .dropzone b{color:var(--cold);font-weight:normal;}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;
+    justify-content:center;padding:20px;z-index:10;}
+  .modal.show{display:flex;} .modal .box{background:var(--panel);border:1px solid var(--border);
+    border-radius:12px;padding:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto;}
+  .modal img{max-width:180px;border-radius:8px;float:right;margin:0 0 10px 12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>中国民俗恐怖 · <span class="red">视觉记忆系统</span></h1>
+  <div class="sub">批量收录 → AI 视觉理解 → 人工校正 → 视觉 Memory → 故事检索增强</div>
+  <div class="stats" id="stats"></div>
+
+  <div class="tabs">
+    <div class="tab active" data-t="collect">① 收录</div>
+    <div class="tab" data-t="review">② 审核</div>
+    <div class="tab" data-t="memory">③ Memory 库</div>
+  </div>
+
+  <!-- 收录 -->
+  <div class="panel active" id="p-collect">
+    <div class="card">
+      <label>批量导入(服务器可访问的文件夹路径,递归所有图片)</label>
+      <div class="row">
+        <input type="text" id="folder" placeholder="例如:dataset/guizhou_house 或绝对路径" style="flex:1" />
+        <button id="btn-folder">批量导入</button>
+      </div>
+      <div class="hint">按子目录名自动记为原始分类。导入后到「审核」页批量分析。</div>
+      <div class="err" id="collect-err"></div>
+    </div>
+    <div class="card">
+      <label>单张上传</label>
+      <input type="text" id="up-desc" placeholder="原始描述 / 分类(可选,如 贵州老宅)" style="margin-bottom:8px" />
+      <input type="file" id="file" accept="image/*" hidden multiple />
+      <div class="dropzone" id="dropzone">
+        <span class="big">🖼️</span>
+        把图片<b>拖到这里</b>,或<b>点击选择</b>(可多选)
+      </div>
+      <div class="hint" id="upload-status" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- 审核 -->
+  <div class="panel" id="p-review">
+    <div class="row">
+      <button id="btn-analyze-all">批量分析(pending)</button>
+      <button class="ghost" id="btn-refresh">刷新列表</button>
+      <span class="hint" style="margin:0">点击卡片:分析 / 编辑 / 存入 Memory</span>
+    </div>
+    <div class="hint" style="margin-top:4px">已入库的图片会移到「Memory 库」页,这里只显示待处理/待审核的。</div>
+    <div class="progress" id="analyze-progress" style="display:none">
+      <div class="pbar"><div class="pbar-fill" id="pbar-fill"></div></div>
+      <div class="hint" id="pbar-text" style="margin-top:6px"></div>
+    </div>
+    <div class="grid" id="mat-grid"></div>
+  </div>
+
+  <!-- Memory 库 -->
+  <div class="panel" id="p-memory">
+    <div class="row">
+      <button class="ghost" id="btn-mem-refresh">刷新列表</button>
+      <span class="hint" style="margin:0">点击卡片编辑;垃圾桶图标删除。共 <b id="mem-count">0</b> 条已入库。</span>
+    </div>
+    <div class="grid" id="mem-grid"></div>
+  </div>
+
+</div>
+
+<!-- 审核弹窗 -->
+<div class="modal" id="modal"><div class="box" id="modal-box"></div></div>
+
+<script>
+console.log("[视觉记忆系统] UI build 2026-07-27b 已加载");
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+
+// tabs
+$$(".tab").forEach(t=>t.onclick=()=>{
+  $$(".tab").forEach(x=>x.classList.remove("active")); t.classList.add("active");
+  $$(".panel").forEach(p=>p.classList.remove("active"));
+  $("#p-"+t.dataset.t).classList.add("active");
+  if(t.dataset.t==="review") loadMaterials();
+  if(t.dataset.t==="memory") loadMemories();
+});
+
+async function api(url,opts){const r=await fetch(url,opts);if(!r.ok)throw new Error((await r.json().catch(()=>({}))).detail||r.statusText);return r.json();}
+
+async function loadStats(){try{const s=await api("/api/stats");
+  $("#stats").innerHTML=`<div class="stat"><b>${s.materials}</b>素材</div>
+    <div class="stat"><b>${s.analyzed}</b>已分析</div>
+    <div class="stat"><b>${s.reviewed}</b>已入库 Memory</div>`;}catch(e){}}
+
+// 收录
+$("#btn-folder").onclick=async()=>{
+  const folder=$("#folder").value.trim(); if(!folder)return;
+  $("#collect-err").textContent="";
+  try{const r=await api("/api/collect/folder",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({folder})});
+    $("#collect-err").style.color="#3fae6a"; $("#collect-err").textContent=`已导入 ${r.count} 张(批次 ${r.batch})`; loadStats();
+  }catch(e){$("#collect-err").style.color="#f0b8b8";$("#collect-err").textContent="导入失败:"+e.message;}
+};
+// 上传一张图,返回后端结果;失败抛错。
+async function uploadOne(f){
+  const fd=new FormData(); fd.append("file",f); fd.append("orig_desc",$("#up-desc").value||"");
+  const r=await fetch("/api/collect/upload",{method:"POST",body:fd});
+  if(!r.ok) throw new Error((await r.json().catch(()=>({}))).detail||r.statusText);
+  return r.json();
+}
+// 逐张上传一批图片(点击选择或拖放都走这里),带进度/结果反馈。
+async function uploadFiles(fileList){
+  const files=[...fileList].filter(f=>f.type.startsWith("image/"));
+  const st=$("#upload-status");
+  if(!files.length){ st.style.color="#f0b8b8"; st.textContent="没有可上传的图片文件。"; return; }
+  let ok=0, fail=0, lastId=null;
+  for(let i=0;i<files.length;i++){
+    st.style.color="var(--muted)"; st.textContent=`上传中 ${i+1}/${files.length}:${files[i].name}…`;
+    try{ const j=await uploadOne(files[i]); ok++; lastId=j.material_id; }
+    catch(e){ fail++; }
+    loadStats();
+  }
+  st.style.color=fail?"#f0b8b8":"#3fae6a";
+  st.textContent=`✓ 已上传 ${ok} 张`+(fail?`,失败 ${fail} 张`:"")+(ok===1&&lastId?`(素材 #${lastId})`:"");
+  $("#file").value="";
+}
+// 点击拖放区 = 弹选图框;选完自动上传。
+const dz=$("#dropzone");
+dz.onclick=()=>$("#file").click();
+$("#file").onchange=()=>{ if($("#file").files.length) uploadFiles($("#file").files); };
+// 拖放:阻止浏览器默认打开图片的行为,拖入时高亮,松手即上传。
+["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{
+  e.preventDefault(); e.stopPropagation(); dz.classList.add("drag");
+}));
+["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{
+  e.preventDefault(); e.stopPropagation(); dz.classList.remove("drag");
+}));
+dz.addEventListener("drop",e=>{
+  const files=e.dataTransfer&&e.dataTransfer.files;
+  if(files&&files.length) uploadFiles(files);
+});
+
+// 审核
+async function loadMaterials(){
+  const mats=await api("/api/materials?exclude_reviewed=true");
+  $("#mat-grid").innerHTML=mats.map(m=>`
+    <div class="mat" data-mid="${m.id}" onclick="openMat(${m.id},${m.memory_id||"null"},0)">
+      <img src="/uploads/${m.file_path}" />
+      <div class="meta">#${m.id} <span class="badge ${m.status}">${m.status}</span></div>
+    </div>`).join("")||'<div class="hint">没有待审核的素材。已入库的在「Memory 库」页。</div>';
+}
+
+// Memory 库:已入库的图,可编辑/删除
+async function loadMemories(){
+  const mems=await api("/api/memories");
+  $("#mem-count").textContent=mems.length;
+  window._mems={};  // 缓存,供点击编辑直接取
+  $("#mem-grid").innerHTML=mems.map(m=>{window._mems[m.id]=m;return `
+    <div class="mat" style="position:relative">
+      <div onclick="openMemEdit(${m.id})" style="cursor:pointer">
+        <img src="/uploads/${m.file_path}" />
+        <div class="meta">#M${m.id} ${m.title||"(未命名)"}<br>
+          <span class="badge reviewed">reviewed</span>
+          ${m.region?`<span class="badge">${m.region}</span>`:""}</div>
+      </div>
+      <button class="ghost" title="从 Memory 删除" onclick="delMem(${m.id})"
+        style="position:absolute;top:4px;right:4px;margin:0;padding:2px 8px;font-size:14px;line-height:1;">🗑</button>
+    </div>`;}).join("")||'<div class="hint">Memory 库为空。到「审核」页把素材校正后「保存 Memory」即可入库。</div>';
+}
+$("#btn-mem-refresh").onclick=loadMemories;
+window.openMemEdit=(memId)=>{ const mem=window._mems[memId];
+  renderReviewModal(mem.material_id, mem.file_path, memId, mem); };
+window.delMem=async(memId)=>{
+  if(!confirm(`确定从 Memory 库删除 #M${memId}?将同时移除该素材与图片文件,不可恢复。`))return;
+  await api("/api/memory/"+memId,{method:"DELETE"});
+  loadMemories(); loadStats();
+};
+$("#btn-refresh").onclick=loadMaterials;
+// 批量分析:逐张调 /api/analyze,实时显示进度(X/N + 进度条 + 当前卡片高亮)。
+$("#btn-analyze-all").onclick=async()=>{
+  const pending=await api("/api/materials?status=pending");
+  const prog=$("#analyze-progress"), fill=$("#pbar-fill"), text=$("#pbar-text");
+  if(!pending.length){ prog.style.display="block"; fill.style.width="100%";
+    text.textContent="没有待分析(pending)的素材。"; return; }
+  const btn=$("#btn-analyze-all"); btn.disabled=true; btn.textContent="分析中…";
+  prog.style.display="block"; fill.style.width="0%";
+  let done=0, fail=0; const total=pending.length;
+  for(const m of pending){
+    const card=document.querySelector(`.mat[data-mid="${m.id}"]`);
+    if(card) card.classList.add("doing");
+    text.textContent=`分析中 ${done+1}/${total} · 素材 #${m.id}${fail?`(失败 ${fail})`:""}`;
+    try{ await api("/api/analyze/"+m.id,{method:"POST"}); }
+    catch(e){ fail++; }
+    done++; fill.style.width=Math.round(done/total*100)+"%";
+    if(card) card.classList.remove("doing");
+    loadStats();
+  }
+  text.textContent=`✓ 完成:分析 ${done-fail}/${total} 张${fail?`,失败 ${fail} 张`:""}`;
+  btn.disabled=false; btn.textContent="批量分析(pending)";
+  loadMaterials();
+  setTimeout(()=>{ if(text.textContent.startsWith("✓")) prog.style.display="none"; }, 4000);
+};
+
+window.openMat=async(mid,memId,reviewed)=>{
+  let mem=null;
+  if(memId){mem=await api("/api/memory/"+memId);}
+  else{mem=await api("/api/analyze/"+mid,{method:"POST"});memId=mem.id;loadStats();}
+  const filePath=(await api("/api/materials")).find(x=>x.id===mid).file_path;
+  renderReviewModal(mid,filePath,memId,mem);
+};
+// 共用的审核/编辑弹窗(审核页与 Memory 库页复用)
+window.renderReviewModal=(mid,filePath,memId,mem)=>{
+  const arr=k=>(mem[k]||[]).join(", ");
+  $("#modal-box").innerHTML=`
+    <img src="/uploads/${filePath}"/>
+    <div class="lab blue">审核 · Memory #${memId}</div>
+    <label>标题</label><input type="text" id="f-title" value="${mem.title||""}"/>
+    <label>地域</label><input type="text" id="f-region" value="${mem.region||""}"/>
+    <label>年代</label><input type="text" id="f-era" value="${mem.era||""}"/>
+    <label>文化标签(逗号分隔)</label><input type="text" id="f-culture" value="${arr('culture_tags')}"/>
+    <label>故事用途(逗号分隔)</label><input type="text" id="f-story" value="${arr('story_tags')}"/>
+    <label>情绪标签(逗号分隔)</label><input type="text" id="f-emotion" value="${arr('emotion_tags')}"/>
+    <label>描述(用于生成)</label><input type="text" id="f-desc" value="${mem.description||""}"/>
+    <div class="row"><button onclick="saveReview(${memId})">保存 Memory</button>
+      <button class="ghost" onclick="$('#modal').classList.remove('show')">关闭</button></div>`;
+  $("#modal").classList.add("show");
+};
+const splitTags=s=>s.split(",").map(x=>x.trim()).filter(Boolean);
+window.saveReview=async(memId)=>{
+  const edited={title:$("#f-title").value,region:$("#f-region").value,era:$("#f-era").value,
+    culture_tags:splitTags($("#f-culture").value),story_tags:splitTags($("#f-story").value),
+    emotion_tags:splitTags($("#f-emotion").value),description:$("#f-desc").value};
+  await api("/api/review/"+memId,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({edited})});
+  $("#modal").classList.remove("show"); loadMaterials(); loadStats();
+  if($("#p-memory").classList.contains("active")) loadMemories();
+};
+
+loadStats();
+</script>
+</body>
+</html>
