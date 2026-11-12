@@ -37,7 +37,7 @@
 | 仓库 | 角色 |
 |------|------|
 | **本仓库** · folk-horror-visual-memory | 视觉记忆库:素材收录 → 视觉理解 → 人工审核 → 向量检索 |
-| [folk-horror-video-generator](https://github.com/Sanniu1993/folk-horror-video-generator) | 下游生成器:稿件 → 分镜 → 出图(检索记忆增强)→ 配音字幕成片 |
+| [video-generate-by-desc](https://github.com/Sanniu1993/video-generate-by-desc) | 下游生成器:稿件 → 分镜 → 出图(检索记忆增强)→ 配音字幕成片 |
 
 ```mermaid
 flowchart LR
@@ -85,7 +85,7 @@ cp .env.example .env      # 填入 AIHUBMIX_API_KEY 与 DEEPSEEK_API_KEY
 
 ### 接入视频生成器
 
-在 [生成器](https://github.com/Sanniu1993/folk-horror-video-generator) 的 `config.yaml` 中:
+在 [生成器](https://github.com/Sanniu1993/video-generate-by-desc) 的 `config.yaml` 中:
 
 ```yaml
 visual_memory:
